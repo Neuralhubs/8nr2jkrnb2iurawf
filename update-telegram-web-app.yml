@@ -1,0 +1,28 @@
+name: Update Telegram Web App Script
+
+on:
+  schedule:
+    - cron: '0 * * * *'      # top of every hour
+  workflow_dispatch:       # allows manual runs too
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download telegram-web-app.js
+        run: |
+          curl -sSL https://telegram.org/js/telegram-web-app.js -o telegram-web-app.js
+
+      - name: Commit updated script
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          if ! git diff --quiet telegram-web-app.js; then
+            git add telegram-web-app.js
+            git commit -m "chore: update telegram-web-app.js to $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git push
+          else
+            echo "No changes detected."
+          fi
